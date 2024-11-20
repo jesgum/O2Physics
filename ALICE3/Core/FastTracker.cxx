@@ -26,7 +26,7 @@ namespace fastsim
 FastTracker::FastTracker()
 {
   // base constructor
-  magneticField = 5; // in kiloGauss
+  magneticField = 20; // in kiloGauss
   applyZacceptance = false;
   covMatFactor = 0.99f;
   verboseLevel = 0;
@@ -89,7 +89,7 @@ void FastTracker::AddSiliconALICE3v1()
 {
   LOG(info) << " Adding ALICE 3 v1 ITS layers";
   float x0IT = 0.001;        // 0.1%
-  float x0OT = 0.005;        // 0.5%
+  float x0OT = 0.01;        // 1%
   float xrhoIB = 2.3292e-02; // 100 mum Si
   float xrhoOB = 2.3292e-01; // 1000 mum Si
 
@@ -97,21 +97,21 @@ void FastTracker::AddSiliconALICE3v1()
   float resZIT = 0.00025;    //  2.5 mum
   float resRPhiOT = 0.00100; // 5 mum
   float resZOT = 0.00100;    // 5 mum
-  float eff = 1.00;
+  float eff = 0.98;
 
-  layers.push_back(DetLayer{"bpipe0", 0.48, 250, 0.00042, 2.772e-02, 0.0f, 0.0f, 0.0f, 1}); // 150 mum Be
-  layers.push_back(DetLayer{"B00", 0.5, 250, x0IT, xrhoIB, resRPhiIT, resZIT, eff, 1});
-  layers.push_back(DetLayer{"B01", 1.2, 250, x0IT, xrhoIB, resRPhiIT, resZIT, eff, 1});
-  layers.push_back(DetLayer{"B02", 2.5, 250, x0IT, xrhoIB, resRPhiIT, resZIT, eff, 1});
-  layers.push_back(DetLayer{"bpipe1", 3.7, 250, 0.0014, 9.24e-02, 0.0f, 0.0f, 0.0f, 1}); // 500 mum Be
-  layers.push_back(DetLayer{"B03", 3.75, 250, x0OT, xrhoOB, resRPhiOT, resZOT, eff, 1});
-  layers.push_back(DetLayer{"B04", 7., 250, x0OT, xrhoOB, resRPhiOT, resZOT, eff, 1});
-  layers.push_back(DetLayer{"B05", 12., 250, x0OT, xrhoOB, resRPhiOT, resZOT, eff, 1});
-  layers.push_back(DetLayer{"B06", 20., 250, x0OT, xrhoOB, resRPhiOT, resZOT, eff, 1});
-  layers.push_back(DetLayer{"B07", 30., 250, x0OT, xrhoOB, resRPhiOT, resZOT, eff, 1});
-  layers.push_back(DetLayer{"B08", 45., 250, x0OT, xrhoOB, resRPhiOT, resZOT, eff, 1});
-  layers.push_back(DetLayer{"B09", 60., 250, x0OT, xrhoOB, resRPhiOT, resZOT, eff, 1});
-  layers.push_back(DetLayer{"B10", 80., 250, x0OT, xrhoOB, resRPhiOT, resZOT, eff, 1});
+  layers.push_back(DetLayer{"bpipe0", 0.48, 250, 0.00042, 2.772e-02, 0.0f,      0.0f,   0.0f, 0}); // 150 mum Be
+  layers.push_back(DetLayer{"B00",    0.5,  250, x0IT,    xrhoIB,   resRPhiIT,  resZIT, eff,  1});
+  layers.push_back(DetLayer{"B01",    1.2,  250, x0IT,    xrhoIB,   resRPhiIT,  resZIT, eff,  1});
+  layers.push_back(DetLayer{"B02",    2.5,  250, x0IT,    xrhoIB,   resRPhiIT,  resZIT, eff,  1});
+  layers.push_back(DetLayer{"bpipe1", 3.7,  250, 0.0014,  9.24e-02, 0.0f,       0.0f,   0.0f, 0}); // 500 mum Be
+  layers.push_back(DetLayer{"B03",    3.75, 250, x0OT,    xrhoOB,   resRPhiOT,  resZOT, eff,  1});
+  layers.push_back(DetLayer{"B04",    7.,   250, x0OT,    xrhoOB,   resRPhiOT,  resZOT, eff,  1});
+  layers.push_back(DetLayer{"B05",    12.,  250, x0OT,    xrhoOB,   resRPhiOT,  resZOT, eff,  1});
+  layers.push_back(DetLayer{"B06",    20.,  250, x0OT,    xrhoOB,   resRPhiOT,  resZOT, eff,  1});
+  layers.push_back(DetLayer{"B07",    30.,  250, x0OT,    xrhoOB,   resRPhiOT,  resZOT, eff,  1});
+  layers.push_back(DetLayer{"B08",    45.,  250, x0OT,    xrhoOB,   resRPhiOT,  resZOT, eff,  1});
+  layers.push_back(DetLayer{"B09",    60.,  250, x0OT,    xrhoOB,   resRPhiOT,  resZOT, eff,  1});
+  layers.push_back(DetLayer{"B10",    80.,  250, x0OT,    xrhoOB,   resRPhiOT,  resZOT, eff,  1});
 }
 
 void FastTracker::AddTPC(float phiResMean, float zResMean)
@@ -167,9 +167,14 @@ int FastTracker::FastTrack(o2::track::TrackParCov inputTrack, o2::track::TrackPa
   nIntercepts = 0;
   nSiliconPoints = 0;
   nGasPoints = 0;
+  float kTrackingMargin = 0.1;
+  int xrhosteps = 10;
+  bool angluarCorrection = true;
   std::array<float, 3> posIni; // provision for != PV
   inputTrack.getXYZGlo(posIni);
   float initialRadius = std::hypot(posIni[0], posIni[1]);
+  
+  static int nProblems = 0;
 
   // +-~-<*>-~-+-~-<*>-~-+-~-<*>-~-+-~-<*>-~-+-~-<*>-~-+
   // Outward pass to find intercepts
@@ -179,27 +184,56 @@ int FastTracker::FastTrack(o2::track::TrackParCov inputTrack, o2::track::TrackPa
     // check if layer is doable
     if (layers[il].r < initialRadius)
       continue; // this layer should not be attempted, but go ahead
-    if (layers[il].type == 0)
-      continue; // inert layer, skip
 
     // check if layer is reached
     float targetX = 1e+3;
+    bool ok = true;
     inputTrack.getXatLabR(layers[il].r, targetX, magneticField);
-    if (targetX > 999)
+    if (targetX > 999) 
       break; // failed to find intercept
 
-    if (!inputTrack.propagateTo(targetX, magneticField)) {
-      break; // failed to propagate
+    ok = inputTrack.propagateTo(targetX, magneticField);
+    if (ok && correctForMS) {
+      ok = inputTrack.correctForMaterial(layers[il].x0, 0, angluarCorrection);
     }
-    if (std::abs(inputTrack.getZ()) > layers[il].z && applyZacceptance) {
-      break; // out of acceptance bounds
+    if (ok && correctForEloss && layers[il].xrho > 0) { // correct in small steps
+      for (int ise = xrhosteps; ise--;) {
+        ok = inputTrack.correctForMaterial(0, -layers[il].xrho / xrhosteps, angluarCorrection);
+        if (!ok) break;
+      }
+    }
+    
+    // was there a problem on this layer?
+    if (true && correctForEloss) {
+      if (!ok && il > 0) { // may fail to reach target layer due to the eloss
+        float rad2 = inputTrack.getX()*inputTrack.getX() + inputTrack.getY()*inputTrack.getY();
+        float fMinRadTrack = 132.;
+        float maxR = layers[il-1].r + kTrackingMargin*2;
+        float minRad = (fMinRadTrack > 0 && fMinRadTrack < maxR) ? fMinRadTrack : maxR;
+        if (rad2 - minRad*minRad < kTrackingMargin*kTrackingMargin) { // check previously reached layer
+          return -5; // did not reach min requested layer
+        } else {
+          break;
+        }
+      }
     }
 
+    if (!ok) break;
+    if ((std::abs(inputTrack.getZ()) > layers[il].z) && applyZacceptance) {
+      break;
+    }
     // layer is reached
     if (firstLayerReached < 0)
       firstLayerReached = il;
     lastLayerReached = il;
     nIntercepts++;
+  }
+
+  // do tiny overshoot for the safety of the back-propagation
+  if (true && correctForEloss) {
+    if (!inputTrack.propagateTo(inputTrack.getX() + kTrackingMargin, magneticField)) {
+      return -9;
+    }
   }
 
   // +-~-<*>-~-+-~-<*>-~-+-~-<*>-~-+-~-<*>-~-+-~-<*>-~-+
@@ -247,8 +281,6 @@ int FastTracker::FastTrack(o2::track::TrackParCov inputTrack, o2::track::TrackPa
   // +-~-<*>-~-+-~-<*>-~-+-~-<*>-~-+-~-<*>-~-+-~-<*>-~-+
   // Inward pass to calculate covariances
   for (int il = lastLayerReached; il >= firstLayerReached; il--) {
-    if (layers[il].type == 0)
-      continue; // inert layer, skip
 
     float targetX = 1e+3;
     inputTrack.getXatLabR(layers[il].r, targetX, magneticField);
@@ -273,15 +305,33 @@ int FastTracker::FastTrack(o2::track::TrackParCov inputTrack, o2::track::TrackPa
       TMath::Cos(alpha) * spacePoint[0] + TMath::Sin(alpha) * spacePoint[1],
       -TMath::Sin(alpha) * spacePoint[0] + TMath::Cos(alpha) * spacePoint[1],
       spacePoint[2]};
-    if (!(outputTrack.propagateTo(xyz1[0], magneticField)))
+    if (!outputTrack.propagateTo(xyz1[0], magneticField))
       continue;
 
-    const o2::track::TrackParametrization<float>::dim2_t hitpoint = {
-      static_cast<float>(xyz1[1]),
-      static_cast<float>(xyz1[2])};
-    const o2::track::TrackParametrization<float>::dim3_t hitpointcov = {layers[il].resRPhi * layers[il].resRPhi, 0.f, layers[il].resZ * layers[il].resZ};
-    outputTrack.update(hitpoint, hitpointcov);
-    outputTrack.checkCovariance();
+    if (layers[il].type == 1) { // only update covm for tracker hits
+      const o2::track::TrackParametrization<float>::dim2_t hitpoint = {
+        static_cast<float>(xyz1[1]),
+        static_cast<float>(xyz1[2])};
+      const o2::track::TrackParametrization<float>::dim3_t hitpointcov = {layers[il].resRPhi * layers[il].resRPhi, 0.f, layers[il].resZ * layers[il].resZ};
+
+      outputTrack.update(hitpoint, hitpointcov);
+      outputTrack.checkCovariance();
+    }
+
+    if (correctForMS) {
+      if (layers[il].x0>0 && !outputTrack.correctForMaterial(layers[il].x0, 0, angluarCorrection)) {
+        return -6;
+      }
+    }
+    if (correctForEloss) {
+      if (layers[il].xrho > 0)  { // correct in small steps
+        for (int ise = xrhosteps; ise--;) {
+          if (!outputTrack.correctForMaterial(0, layers[il].xrho / xrhosteps, angluarCorrection)) {
+            return -7;
+          }
+        }
+      }
+    }
 
     if (layers[il].type == 1)
       nSiliconPoints++; // count silicon hits
