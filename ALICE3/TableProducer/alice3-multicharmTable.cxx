@@ -71,7 +71,7 @@ using tofTracks = soa::Join<aod::Tracks, aod::UpgradeTofs>;
 using richTracks = soa::Join<aod::Tracks, aod::RICHs>;
 using alice3tracks = soa::Join<aod::Tracks, aod::TracksCov, aod::Alice3DecayMaps, aod::McTrackLabels, aod::TracksDCA, aod::TracksExtraA3, aod::UpgradeTofs, aod::UpgradeTofExpectedTimes>;
 
-struct alice3multicharm {
+struct alice3multicharmTable {
   SliceCache cache;
 
   Produces<aod::MCharmIndices> multiCharmIdx;
@@ -714,6 +714,11 @@ struct alice3multicharm {
 
             // produce multi-charm table for posterior analysis
             if (fillDerivedTable) {
+              multiCharmIdx(
+                xiCand.globalIndex(),
+                pi1c.globalIndex(), pi2c.globalIndex(),
+                picc.globalIndex());
+
               multiCharmCore(
                 thisXiCcandidate.dca, thisXiCCcandidate.dca,
                 thisXiCcandidate.mass, thisXiCCcandidate.mass,
@@ -723,9 +728,19 @@ struct alice3multicharm {
                 pi1c.nSiliconHits(), pi2c.nSiliconHits(), picc.nSiliconHits(),
                 piFromXi.nTPCHits(), piFromLa.nTPCHits(), prFromLa.nTPCHits(),
                 pi1c.nTPCHits(), pi2c.nTPCHits(), picc.nTPCHits(),
-                xi.dcaXY(), xicdcaXY, xiccdcaXY,
-                piFromXi.dcaXY(), piFromLa.dcaXY(), prFromLa.dcaXY(),
-                pi1c.dcaXY(), pi2c.dcaXY(), picc.dcaXY());
+                xi.dcaXY(), xi.dcaZ(), 
+                xicdcaXY, xicdcaZ, 
+                xiccdcaXY, xiccdcaZ,
+                piFromXi.dcaXY(), piFromXi.dcaZ(), 
+                piFromLa.dcaXY(), piFromLa.dcaZ(), 
+                prFromLa.dcaXY(), prFromLa.dcaZ(),
+                pi1c.dcaXY(), pi1c.dcaZ(), 
+                pi2c.dcaXY(), pi2c.dcaZ(), 
+                picc.dcaXY(), picc.dcaZ(),
+                xicDecayRadius2D, xiccDecayRadius2D,
+                xicProperLength, xicDecayDistanceFromPV,
+                xiccProperLength
+              );
             }
           }
           histos.fill(HIST("hCombinationsXiCC"), nCombinationsCC);
@@ -737,13 +752,13 @@ struct alice3multicharm {
   //*+-+*+-+*+-+*+-+*+-+*+-+*+-+*+-+*+-+*+-+*
 
   //*>-~-<*>-~-<*>-~-<*>-~-<*>-~-<*>-~-<*>-~-<*>-~-<*
-  PROCESS_SWITCH(alice3multicharm, processGenerated, "fill MC-only histograms", true);
-  PROCESS_SWITCH(alice3multicharm, processFindXiCC, "find XiCC baryons", true);
+  PROCESS_SWITCH(alice3multicharmTable, processGenerated, "fill MC-only histograms", true);
+  PROCESS_SWITCH(alice3multicharmTable, processFindXiCC, "find XiCC baryons", true);
   //*>-~-<*>-~-<*>-~-<*>-~-<*>-~-<*>-~-<*>-~-<*>-~-<*
 };
 
 WorkflowSpec defineDataProcessing(ConfigContext const& cfgc)
 {
   return WorkflowSpec{
-    adaptAnalysisTask<alice3multicharm>(cfgc)};
+    adaptAnalysisTask<alice3multicharmTable>(cfgc)};
 }

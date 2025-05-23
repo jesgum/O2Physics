@@ -31,12 +31,12 @@ DECLARE_SOA_INDEX_COLUMN_FULL(XiCPion1, xiCPion1, int, Tracks, "_Pi1XiC");
 DECLARE_SOA_INDEX_COLUMN_FULL(XiCPion2, xiCPion2, int, Tracks, "_Pi2XiC");
 DECLARE_SOA_INDEX_COLUMN_FULL(XiCCPion, xiCCPion, int, Tracks, "_PiXiCC");
 
-// topo vars
-DECLARE_SOA_COLUMN(DCAXiCDaughters, dcaXiCDaughters, float);
-DECLARE_SOA_COLUMN(DCAXiCCDaughters, dcaXiCCDaughters, float);
+// topo vars xicDaughtersDCA
+DECLARE_SOA_COLUMN(XicDauDCA, xicDauDCA, float);
+DECLARE_SOA_COLUMN(XiccDauDCA, xiccDauDCA, float);
 
-DECLARE_SOA_COLUMN(MXiC, mXiC, float);
-DECLARE_SOA_COLUMN(MXiCC, mXiCC, float);
+DECLARE_SOA_COLUMN(MXiC, mXic, float);
+DECLARE_SOA_COLUMN(MXiCC, mXicc, float);
 
 // kine vars
 DECLARE_SOA_COLUMN(Pt, pt, float);
@@ -59,17 +59,33 @@ DECLARE_SOA_COLUMN(NTPCHitsPiC2, nTPCHitsPiC2, int);
 DECLARE_SOA_COLUMN(NTPCHitsPiCC, nTPCHitsPiCC, int);
 
 // DCA to PV variables
-DECLARE_SOA_COLUMN(DCAToPVXi, dcaToPVXi, float);
-DECLARE_SOA_COLUMN(DCAToPVXiC, dcaToPVXiC, float);
-DECLARE_SOA_COLUMN(DCAToPVXiCC, dcaToPVXiCC, float);
+DECLARE_SOA_COLUMN(XiDCAxy, xiDCAxy, float);
+DECLARE_SOA_COLUMN(XicDCAxy, xicDCAxy, float);
+DECLARE_SOA_COLUMN(XiccDCAxy, xiccDCAxy, float);
+DECLARE_SOA_COLUMN(XiDCAz, xiDCAz, float);
+DECLARE_SOA_COLUMN(XicDCAz, xicDCAz, float);
+DECLARE_SOA_COLUMN(XiccDCAz, xiccDCAz, float);
 
-DECLARE_SOA_COLUMN(DCAToPVPiFromXi, dcaToPVPiFromXi, float);
-DECLARE_SOA_COLUMN(DCAToPVPiFromLa, dcaToPVPiFromLa, float);
-DECLARE_SOA_COLUMN(DCAToPVPrFromLa, dcaToPVPrFromLa, float);
+DECLARE_SOA_COLUMN(PiFromXiDCAxy, piFromXiDCAxy, float);
+DECLARE_SOA_COLUMN(PiFromLaDCAxy, piFromLaDCAxy, float);
+DECLARE_SOA_COLUMN(PrFromLaDCAxy, prFromLaDCAxy, float);
+DECLARE_SOA_COLUMN(PiFromXiDCAz, piFromXiDCAz, float);
+DECLARE_SOA_COLUMN(PiFromLaDCAz, piFromLaDCAz, float);
+DECLARE_SOA_COLUMN(PrFromLaDCAz, prFromLaDCAz, float);
 
-DECLARE_SOA_COLUMN(DCAToPVPiC1, dcaToPVPiC1, float);
-DECLARE_SOA_COLUMN(DCAToPVPiC2, dcaToPVPiC2, float);
-DECLARE_SOA_COLUMN(DCAToPVPiCC, dcaToPVPiCC, float);
+DECLARE_SOA_COLUMN(Pi1cDCAxy, pi1cDCAxy, float);
+DECLARE_SOA_COLUMN(Pi2cDCAxy, pi2cDCAxy, float);
+DECLARE_SOA_COLUMN(PiccDCAxy, piccDCAxy, float);
+DECLARE_SOA_COLUMN(Pi1cDCAz, pi1cDCAz, float);
+DECLARE_SOA_COLUMN(Pi2cDCAz, pi2cDCAz, float);
+DECLARE_SOA_COLUMN(PiccDCAz, piccDCAz, float);
+
+// Lengths
+DECLARE_SOA_COLUMN(XicDecayRadius2D, xicDecayRadius2D, float);
+DECLARE_SOA_COLUMN(XiccDecayRadius2D, xiccDecayRadius2D, float);
+DECLARE_SOA_COLUMN(XicProperLength, xicProperLength, float);
+DECLARE_SOA_COLUMN(XicDistanceFromPV, xicDistanceFromPV, float);
+DECLARE_SOA_COLUMN(XiccProperLength, xiccProperLength, float);
 
 } // namespace otfmulticharm
 DECLARE_SOA_TABLE(MCharmIndices, "AOD", "MCharmIndices",
@@ -80,8 +96,8 @@ DECLARE_SOA_TABLE(MCharmIndices, "AOD", "MCharmIndices",
                   otfmulticharm::XiCCPionId);
 
 DECLARE_SOA_TABLE(MCharmCores, "AOD", "MCharmCores",
-                  otfmulticharm::DCAXiCDaughters,
-                  otfmulticharm::DCAXiCCDaughters,
+                  otfmulticharm::XicDauDCA,
+                  otfmulticharm::XiccDauDCA,
                   otfmulticharm::MXiC,
                   otfmulticharm::MXiCC,
                   otfmulticharm::Pt,
@@ -101,15 +117,32 @@ DECLARE_SOA_TABLE(MCharmCores, "AOD", "MCharmCores",
                   otfmulticharm::NTPCHitsPiC2,
                   otfmulticharm::NTPCHitsPiCC,
 
-                  otfmulticharm::DCAToPVXi,
-                  otfmulticharm::DCAToPVXiC,
-                  otfmulticharm::DCAToPVXiCC,
-                  otfmulticharm::DCAToPVPiFromXi,
-                  otfmulticharm::DCAToPVPiFromLa,
-                  otfmulticharm::DCAToPVPrFromLa,
-                  otfmulticharm::DCAToPVPiC1,
-                  otfmulticharm::DCAToPVPiC2,
-                  otfmulticharm::DCAToPVPiCC);
+                  otfmulticharm::XiDCAxy,
+                  otfmulticharm::XicDCAxy,
+                  otfmulticharm::XiccDCAxy,
+                  otfmulticharm::XiDCAz,
+                  otfmulticharm::XicDCAz,
+                  otfmulticharm::XiccDCAz,
+
+                  otfmulticharm::PiFromXiDCAxy,
+                  otfmulticharm::PiFromLaDCAxy,
+                  otfmulticharm::PrFromLaDCAxy,
+                  otfmulticharm::PiFromXiDCAz,
+                  otfmulticharm::PiFromLaDCAz,
+                  otfmulticharm::PrFromLaDCAz,
+
+                  otfmulticharm::Pi1cDCAxy,
+                  otfmulticharm::Pi2cDCAxy,
+                  otfmulticharm::PiccDCAxy,
+                  otfmulticharm::Pi1cDCAz,
+                  otfmulticharm::Pi2cDCAz,
+                  otfmulticharm::PiccDCAz,
+
+                  otfmulticharm::XicDecayRadius2D,
+                  otfmulticharm::XiccDecayRadius2D,
+                  otfmulticharm::XicProperLength,
+                  otfmulticharm::XicDistanceFromPV,
+                  otfmulticharm::XiccProperLength);
 
 } // namespace o2::aod
 
