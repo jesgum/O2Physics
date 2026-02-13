@@ -13,21 +13,22 @@
 /// \brief Implementation for smearer service for the on-the-fly simulation
 /// \author Jesper Karlsson Gumprecht <jesper.gumprecht@cern.ch>
 
-
 #ifndef ALICE3_CORE_TRACKSMEARERSERVICE_H_
 #define ALICE3_CORE_TRACKSMEARERSERVICE_H_
 
 #include "ALICE3/Core/DelphesO2TrackSmearer.h"
-#include "Framework/Plugins.h"
-#include "CCDB/BasicCCDBManager.h"
 #include "ALICE3/Core/FastTracker.h"
 
+#include "CCDB/BasicCCDBManager.h"
+#include "Framework/Plugins.h"
+
+#include <condition_variable>
+#include <mutex>
 #include <string>
 #include <vector>
-#include <mutex>
-#include <condition_variable>
 
-namespace o2::upgrade {
+namespace o2::upgrade
+{
 
 struct TrackSmearerImpl {
   static std::vector<std::unique_ptr<o2::delphes::DelphesO2TrackSmearer>> smearerContainer;
@@ -38,8 +39,7 @@ struct TrackSmearerImpl {
   void waitReady();
   o2::delphes::DelphesO2TrackSmearer* getSmearer(int icfg = 0);
 
-
-private:
+ private:
   static bool mIsInit;
   static bool mCleanLutWhenLoaded;
   o2::ccdb::BasicCCDBManager* mCcdb = nullptr;

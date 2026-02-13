@@ -24,7 +24,6 @@
 #include <Framework/HistogramRegistry.h>
 #include <Framework/runDataProcessing.h>
 
-
 #include <map>
 #include <string>
 #include <vector>

@@ -13,16 +13,16 @@
 /// \brief Implementation for smearer service for the on-the-fly simulation
 /// \author Jesper Karlsson Gumprecht <jesper.gumprecht@cern.ch>
 
-
 #include "ALICE3/Core/TrackSmearerService.h"
+
 #include <Framework/CommonServices.h>
 #include <Framework/Plugins.h>
 #include <Framework/ServiceHandle.h>
 #include <Framework/ServiceSpec.h>
 
-#include <string>
 #include <TPDGCode.h>
 
+#include <string>
 #include <vector>
 
 bool o2::upgrade::TrackSmearerImpl::mIsInit = false;
@@ -44,7 +44,6 @@ void o2::upgrade::TrackSmearerImpl::initSmearer(o2::ccdb::BasicCCDBManager* ccdb
   mCcdb->setTimestamp(-1);
   mCleanLutWhenLoaded = cleanLutWhenLoaded;
 }
-
 
 std::vector<std::unique_ptr<o2::delphes::DelphesO2TrackSmearer>> o2::upgrade::TrackSmearerImpl::smearerContainer;
 void o2::upgrade::TrackSmearerImpl::initCfg(int icfg, std::map<std::string, std::string> globalConfiguration)
@@ -113,7 +112,6 @@ o2::delphes::DelphesO2TrackSmearer* o2::upgrade::TrackSmearerImpl::getSmearer(in
   return smearerContainer[icfg].get();
 }
 
-
 void o2::upgrade::TrackSmearerImpl::setReady()
 {
   std::ofstream okFile(".TrackSmearerOK");
@@ -138,21 +136,18 @@ struct TrackSmearerSupport : o2::framework::ServicePlugin {
         auto* ptr = new o2::upgrade::TrackSmearerImpl();
         wrapper->setInstance(ptr);
         return o2::framework::ServiceHandle{o2::framework::TypeIdHelpers::uniqueId<o2::upgrade::TrackSmearerContainer>(),
-                                          wrapper,
-                                          o2::framework::ServiceKind::Serial,
-                                          "database-pdg"};
+                                            wrapper,
+                                            o2::framework::ServiceKind::Serial,
+                                            "database-pdg"};
       },
       .configure = o2::framework::CommonServices::noConfiguration(),
       .exit = [](o2::framework::ServiceRegistryRef, void* service) {
         auto* s = reinterpret_cast<o2::upgrade::TrackSmearerContainer*>(service);
-        delete s;
-      },
-      .kind = o2::framework::ServiceKind::Serial
-    };
+        delete s; },
+      .kind = o2::framework::ServiceKind::Serial};
   }
 };
 
 DEFINE_DPL_PLUGINS_BEGIN
 DEFINE_DPL_PLUGIN_INSTANCE(TrackSmearerSupport, CustomService);
 DEFINE_DPL_PLUGINS_END
-
