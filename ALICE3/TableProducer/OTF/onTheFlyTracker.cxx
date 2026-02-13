@@ -26,6 +26,7 @@
 #include "ALICE3/Core/DelphesO2TrackSmearer.h"
 #include "ALICE3/Core/DetLayer.h"
 #include "ALICE3/Core/FastTracker.h"
+#include "ALICE3/Core/TrackSmearerService.h"
 #include "ALICE3/Core/TrackUtilities.h"
 #include "ALICE3/DataModel/OTFCollision.h"
 #include "ALICE3/DataModel/OTFMCParticle.h"
@@ -51,7 +52,6 @@
 #include <Framework/runDataProcessing.h>
 #include <ReconstructionDataFormats/DCA.h>
 #include <SimulationDataFormat/InteractionSampler.h>
-#include "ALICE3/Core/TrackSmearerService.h"
 
 #include <TGenPhaseSpace.h>
 #include <TGeoGlobalMagField.h>
@@ -319,12 +319,12 @@ struct OnTheFlyTracker {
 
     const int nGeometries = mGeoContainer.getNumberOfConfigurations();
     mMagneticField = mGeoContainer.getFloatValue(0, "global", "magneticfield");
-    for (int icfg = 0; icfg < nGeometries; ++icfg) {      
+    for (int icfg = 0; icfg < nGeometries; ++icfg) {
       const std::string histPath = "Configuration_" + std::to_string(icfg) + "/";
       if (enablePrimarySmearing) {
         // interpolate efficiencies if requested to do so
         smearerContainer->getSmearer(icfg)->interpolateEfficiency(interpolateLutEfficiencyVsNch.value);
-        
+
         // smear un-reco'ed tracks if asked to do so
         smearerContainer->getSmearer(icfg)->skipUnreconstructed(!processUnreconstructedTracks.value);
 

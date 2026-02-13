@@ -26,6 +26,7 @@
 
 #include "ALICE3/Core/DelphesO2TrackSmearer.h"
 #include "ALICE3/Core/FastTracker.h"
+#include "ALICE3/Core/TrackSmearerService.h"
 #include "ALICE3/Core/TrackUtilities.h"
 #include "ALICE3/DataModel/OTFCollision.h"
 #include "ALICE3/DataModel/OTFTOF.h"
@@ -33,7 +34,6 @@
 #include "Common/DataModel/TrackSelectionTables.h"
 
 #include <CCDB/BasicCCDBManager.h>
-#include "ALICE3/Core/TrackSmearerService.h"
 #include <CCDB/CcdbApi.h>
 #include <CommonConstants/GeomConstants.h>
 #include <CommonConstants/MathConstants.h>
