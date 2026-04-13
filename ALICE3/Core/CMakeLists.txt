@@ -21,6 +21,7 @@ o2physics_add_library(ALICE3Core
 o2physics_target_root_dictionary(ALICE3Core
                       HEADERS TOFResoALICE3.h
                               TrackUtilities.h
+                              FlatTrackSmearer.h
                               FlatLutEntry.h
                               GeometryContainer.h
                       LINKDEF ALICE3CoreLinkDef.h)

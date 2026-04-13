@@ -364,6 +364,32 @@ bool TrackSmearer::smearTrack(O2Track& o2track, int pdg, float nch)
   return smearTrack(o2track, lutEntry, interpolatedEff);
 }
 
+
+bool TrackSmearer::smearTrack(O2Track& o2track, const FlatLutData& lutData, float nch)
+{
+  auto eta = o2track.getEta();
+  auto pt = o2track.getPt();
+  float interpolatedEff = 0.0f;
+  const auto& header = lutData.getHeaderRef();
+  auto inch = header.nchmap.find(nch);
+  auto irad = header.radmap.find(0.f);
+  auto ieta = header.etamap.find(eta);
+  auto ipt = header.ptmap.find(pt);
+  auto pdg = header.pdg;
+
+  switch (pdg) {
+    case o2::constants::physics::kHelium3:
+    case -o2::constants::physics::kHelium3:
+      pt *= 2.f;
+      break;
+  }
+
+  const lutEntry_t* lutEntry = lutData.getEntryRef(inch, irad, ieta, ipt);
+  LOG(info) << "Got entry";
+  return smearTrack(o2track, lutEntry, interpolatedEff);
+}
+
+
 double TrackSmearer::getPtRes(const int pdg, const float nch, const float eta, const float pt) const
 {
   float dummy = 0.0f;
@@ -400,6 +426,48 @@ double TrackSmearer::getAbsEtaRes(const int pdg, const float nch, const float et
 }
 
 double TrackSmearer::getEfficiency(const int pdg, const float nch, const float eta, const float pt) const
+{
+  float efficiency = 0.0f;
+  (void)getLUTEntry(pdg, nch, 0.f, eta, pt, efficiency);
+  return efficiency;
+}
+
+double TrackSmearer::getPtRes(const int pdg, const float nch, const float eta, const float pt)
+{
+  float dummy = 0.0f;
+  const lutEntry_t* lutEntry = getLUTEntry(pdg, nch, 0.f, eta, pt, dummy);
+  auto val = std::sqrt(lutEntry->covm[14]) * lutEntry->pt;
+  return val;
+}
+
+double TrackSmearer::getEtaRes(const int pdg, const float nch, const float eta, const float pt)
+{
+  float dummy = 0.0f;
+  const lutEntry_t* lutEntry = getLUTEntry(pdg, nch, 0.f, eta, pt, dummy);
+  auto sigmatgl = std::sqrt(lutEntry->covm[9]);                                   // sigmatgl2
+  auto etaRes = std::fabs(std::sin(2.0 * std::atan(std::exp(-eta)))) * sigmatgl;  // propagate tgl to eta uncertainty
+  etaRes /= lutEntry->eta;                                                        // relative uncertainty
+  return etaRes;
+}
+
+double TrackSmearer::getAbsPtRes(const int pdg, const float nch, const float eta, const float pt)
+{
+  float dummy = 0.0f;
+  const lutEntry_t* lutEntry = getLUTEntry(pdg, nch, 0.f, eta, pt, dummy);
+  auto val = std::sqrt(lutEntry->covm[14]) * lutEntry->pt * lutEntry->pt;
+  return val;
+}
+
+double TrackSmearer::getAbsEtaRes(const int pdg, const float nch, const float eta, const float pt)
+{
+  float dummy = 0.0f;
+  const lutEntry_t* lutEntry = getLUTEntry(pdg, nch, 0.f, eta, pt, dummy);
+  auto sigmatgl = std::sqrt(lutEntry->covm[9]);                                  // sigmatgl2
+  auto etaRes = std::fabs(std::sin(2.0 * std::atan(std::exp(-eta)))) * sigmatgl; // propagate tgl to eta uncertainty
+  return etaRes;
+}
+
+double TrackSmearer::getEfficiency(const int pdg, const float nch, const float eta, const float pt)
 {
   float efficiency = 0.0f;
   (void)getLUTEntry(pdg, nch, 0.f, eta, pt, efficiency);

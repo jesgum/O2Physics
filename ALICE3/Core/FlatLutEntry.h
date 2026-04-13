@@ -16,8 +16,9 @@
 #include <cstdint>
 #include <span>
 #include <vector>
+#include <fstream>
 
-#define LUTCOVM_VERSION 20260408
+#define LUTCOVM_VERSION 20210801
 
 namespace o2::delphes
 {
@@ -201,7 +202,7 @@ class FlatLutData
   static void validateBuffer(const uint8_t* buffer, size_t size);
 
   std::vector<uint8_t> mData;
-  std::span<uint8_t const> mDataRef;
+  std::span<uint8_t const> mDataRef; //!
 
   // Cache dimensions for quick access
   int mNchBins = 0;

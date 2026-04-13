@@ -44,12 +44,19 @@ class TrackSmearer
 
   bool smearTrack(O2Track& o2track, const lutEntry_t* lutEntry, float interpolatedEff);
   bool smearTrack(O2Track& o2track, int pdg, float nch);
+  bool smearTrack(O2Track& o2track, const FlatLutData& lutData, float nch);
 
   double getPtRes(int pdg, float nch, float eta, float pt) const;
   double getEtaRes(int pdg, float nch, float eta, float pt) const;
   double getAbsPtRes(int pdg, float nch, float eta, float pt) const;
   double getAbsEtaRes(int pdg, float nch, float eta, float pt) const;
   double getEfficiency(int pdg, float nch, float eta, float pt) const;
+
+  double getPtRes(int pdg, float nch, float eta, float pt);
+  double getEtaRes(int pdg, float nch, float eta, float pt);
+  double getAbsPtRes(int pdg, float nch, float eta, float pt);
+  double getAbsEtaRes(int pdg, float nch, float eta, float pt);
+  double getEfficiency(int pdg, float nch, float eta, float pt);
 
   int getIndexPDG(int pdg) const;
 
@@ -73,7 +80,11 @@ class TrackSmearer
 
   bool checkSpecialCase(int pdg, lutHeader_t const& header);
 };
-
 } // namespace o2::delphes
+
+namespace o2::delphes
+{
+using DelphesO2TrackSmearer = TrackSmearer;
+}
 
 #endif // ALICE3_CORE_FLATTRACKSMEARER_H_
