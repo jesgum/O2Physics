@@ -385,7 +385,6 @@ bool TrackSmearer::smearTrack(O2Track& o2track, const FlatLutData& lutData, floa
   }
 
   const lutEntry_t* lutEntry = lutData.getEntryRef(inch, irad, ieta, ipt);
-  LOG(info) << "Got entry";
   return smearTrack(o2track, lutEntry, interpolatedEff);
 }
 
