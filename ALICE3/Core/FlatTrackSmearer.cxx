@@ -173,14 +173,11 @@ bool TrackSmearer::viewTable(int pdg, const uint8_t* buffer, size_t size, bool f
   return true;
 }
 
-<<<<<<< HEAD
-=======
 bool TrackSmearer::viewTable(int pdg, std::span<std::byte> const& span, bool forceReload)
 {
   return viewTable(pdg, reinterpret_cast<const uint8_t*>(span.data()), span.size_bytes(), forceReload);
 }
 
->>>>>>> aalkin/add-improved-lut-format-pr
 bool TrackSmearer::hasTable(int pdg) const
 {
   const int ipdg = getIndexPDG(pdg);
