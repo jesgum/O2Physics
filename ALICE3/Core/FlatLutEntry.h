@@ -150,14 +150,11 @@ class FlatLutData
   static FlatLutData ViewFromBuffer(const uint8_t* buffer, size_t size);
 
   /**
-<<<<<<< HEAD
-=======
    * @brief Construct a new FlatLutData from external span as a view
    */
   static FlatLutData ViewFromBuffer(std::span<std::byte> const& span);
 
   /**
->>>>>>> aalkin/add-improved-lut-format-pr
    * @brief Construct a new FlatLutData from a file
    */
   static FlatLutData loadFromFile(std::ifstream& file, const char* filename);
@@ -215,11 +212,7 @@ class FlatLutData
   static void validateBuffer(const uint8_t* buffer, size_t size);
 
   std::vector<uint8_t> mData;
-<<<<<<< HEAD
   std::span<uint8_t const> mDataRef; //!
-=======
-  std::span<uint8_t const> mDataRef;
->>>>>>> aalkin/add-improved-lut-format-pr
 
   // Cache dimensions for quick access
   int mNchBins = 0;
