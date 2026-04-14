@@ -16,14 +16,9 @@
 #include <cstdint>
 #include <span>
 #include <vector>
-<<<<<<< HEAD
 #include <fstream>
 
 #define LUTCOVM_VERSION 20210801
-=======
-
-#define LUTCOVM_VERSION 20260408
->>>>>>> aalkin/add-improved-lut-format-pr
 
 namespace o2::delphes
 {
