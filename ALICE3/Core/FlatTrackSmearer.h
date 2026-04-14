@@ -60,7 +60,7 @@ class TrackSmearer
   double getEfficiency(int pdg, float nch, float eta, float pt);
 
 
-  const char* getParticleName(int pdg) const;
+  // const char* getParticleName(int pdg) const;
   static int getIndexPDG(int pdg);
   static const char* getParticleName(int pdg);
 

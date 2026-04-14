@@ -19,11 +19,7 @@
 
 namespace o2::delphes
 {
-<<<<<<< HEAD
-int TrackSmearer::getIndexPDG(int pdg) const
-=======
 int TrackSmearer::getIndexPDG(int pdg)
->>>>>>> aalkin/add-improved-lut-format-pr
 {
   switch (std::abs(pdg)) {
     case 11:
@@ -49,11 +45,7 @@ int TrackSmearer::getIndexPDG(int pdg)
   }
 }
 
-<<<<<<< HEAD
-const char* TrackSmearer::getParticleName(int pdg) const
-=======
 const char* TrackSmearer::getParticleName(int pdg)
->>>>>>> aalkin/add-improved-lut-format-pr
 {
   switch (std::abs(pdg)) {
     case 11:
@@ -226,13 +218,8 @@ const lutEntry_t* TrackSmearer::getLUTEntry(const int pdg, const float nch, cons
   auto ipt = header.ptmap.find(pt);
 
   // Interpolate efficiency if requested
-<<<<<<< HEAD
-  auto fraction = header.nchmap.fracPositionWithinBin(nch);
-  if (mInterpolateEfficiency) {
-=======
   if (mInterpolateEfficiency) {
     auto fraction = header.nchmap.fracPositionWithinBin(nch);
->>>>>>> aalkin/add-improved-lut-format-pr
     static constexpr float kFractionThreshold = 0.5f;
     if (fraction > kFractionThreshold) {
       switch (mWhatEfficiency) {
@@ -382,7 +369,6 @@ bool TrackSmearer::smearTrack(O2Track& o2track, int pdg, float nch)
   return smearTrack(o2track, lutEntry, interpolatedEff);
 }
 
-<<<<<<< HEAD
 
 bool TrackSmearer::smearTrack(O2Track& o2track, const FlatLutData& lutData, float nch)
 {
@@ -408,8 +394,6 @@ bool TrackSmearer::smearTrack(O2Track& o2track, const FlatLutData& lutData, floa
 }
 
 
-=======
->>>>>>> aalkin/add-improved-lut-format-pr
 double TrackSmearer::getPtRes(const int pdg, const float nch, const float eta, const float pt) const
 {
   float dummy = 0.0f;
@@ -452,7 +436,6 @@ double TrackSmearer::getEfficiency(const int pdg, const float nch, const float e
   return efficiency;
 }
 
-<<<<<<< HEAD
 double TrackSmearer::getPtRes(const int pdg, const float nch, const float eta, const float pt)
 {
   float dummy = 0.0f;
@@ -495,6 +478,4 @@ double TrackSmearer::getEfficiency(const int pdg, const float nch, const float e
   return efficiency;
 }
 
-=======
->>>>>>> aalkin/add-improved-lut-format-pr
 } // namespace o2::delphes
