@@ -36,7 +36,11 @@ struct TestCcdbConsumer2 {
   o2::framework::HistogramRegistry histos{"Histos", {}, o2::framework::OutputObjHandlingPolicy::AnalysisObject};
   o2::framework::ConfigurableAxis axisDeltaPt{"axisDeltaPt", {200, -0.2f, +0.2f}, "#Delta p_{T}"};
 
+<<<<<<< HEAD
   o2::delphes::DelphesO2TrackSmearer smearer;
+=======
+  o2::delphes::TrackSmearer smearer;
+>>>>>>> aalkin/add-improved-lut-format-pr-test-task
   o2::framework::Service<o2::framework::O2DatabasePDG> pdgDB;
   const std::unordered_set<int> pdgsToBeHandled = {PDG_t::kElectron, PDG_t::kMuonMinus, PDG_t::kPiPlus, PDG_t::kKPlus, PDG_t::kProton};
 
@@ -52,6 +56,7 @@ struct TestCcdbConsumer2 {
 
   void process(o2::aod::McCollisions const& mcCollisions, o2::aod::McParticles const& mcParticles, o2::aod::A3LookUpTables const& luts)
   {
+<<<<<<< HEAD
     const auto thisTable = luts.rawIteratorAt(0);
     auto lutEl = thisTable.lutEl();
     auto lutMu = thisTable.lutMu();
@@ -65,6 +70,16 @@ struct TestCcdbConsumer2 {
     smearer.viewTable(PDG_t::kProton, reinterpret_cast<const uint8_t*>(lutPr.data()), lutPr.size());
 
     for (const auto& mcCollision : mcCollisions) {
+=======
+    const auto thisTable = luts.begin();
+    smearer.viewTable(PDG_t::kElectron, thisTable.lutEl());
+    smearer.viewTable(PDG_t::kMuonMinus, thisTable.lutMu());
+    smearer.viewTable(PDG_t::kPiPlus, thisTable.lutPi());
+    smearer.viewTable(PDG_t::kKPlus, thisTable.lutKa());
+    smearer.viewTable(PDG_t::kProton, thisTable.lutPr());
+
+    for (const auto& _ : mcCollisions) {
+>>>>>>> aalkin/add-improved-lut-format-pr-test-task
       for (const auto& mcParticle : mcParticles) {
         if (!pdgsToBeHandled.count(std::abs(mcParticle.pdgCode()))) {
           continue;

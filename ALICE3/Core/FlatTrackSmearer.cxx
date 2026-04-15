@@ -160,7 +160,7 @@ bool TrackSmearer::viewTable(int pdg, const uint8_t* buffer, size_t size, bool f
     LOGF(error, "%s", framework::error_from_ref(ref).what);
   }
 
-  LOGF(info, "Successfully adopted LUT for PDG %d", pdg);
+  LOGF(info, "Successfully viewing LUT for PDG %d", pdg);
   mLUTData[ipdg].getHeaderRef().print();
   return true;
 }
