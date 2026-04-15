@@ -17,7 +17,7 @@
 #include <span>
 #include <vector>
 
-#define LUTCOVM_VERSION 20260408
+#define LUTCOVM_VERSION 20210801
 
 namespace o2::delphes
 {
