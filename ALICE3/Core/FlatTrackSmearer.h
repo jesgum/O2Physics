@@ -48,11 +48,11 @@ class TrackSmearer
   bool smearTrack(O2Track& o2track, const lutEntry_t* lutEntry, float interpolatedEff);
   bool smearTrack(O2Track& o2track, int pdg, float nch);
 
-  double getPtRes(int pdg, float nch, float eta, float pt) const;
-  double getEtaRes(int pdg, float nch, float eta, float pt) const;
-  double getAbsPtRes(int pdg, float nch, float eta, float pt) const;
-  double getAbsEtaRes(int pdg, float nch, float eta, float pt) const;
-  double getEfficiency(int pdg, float nch, float eta, float pt) const;
+  double getPtRes(const int pdg, const float nch, const float eta, const float pt) const;
+  double getEtaRes(const int pdg, const float nch, const float eta, const float pt) const;
+  double getAbsPtRes(const int pdg, const float nch, const float eta, const float pt) const;
+  double getAbsEtaRes(const int pdg, const float nch, const float eta, const float pt) const;
+  double getEfficiency(const int pdg, const float nch, const float eta, const float pt) const;
 
   static int getIndexPDG(int pdg);
   static const char* getParticleName(int pdg);
