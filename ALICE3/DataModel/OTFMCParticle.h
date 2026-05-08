@@ -84,10 +84,15 @@ DECLARE_SOA_INDEX_COLUMN(McPartWithDau, mcPartWithDau); //! MC particle
 DECLARE_SOA_COLUMN(McMask, mcMask, uint16_t);           //! Bit mask to indicate detector mismatches (bit ON means mismatch). Bit 0-6: mismatch at ITS layer. Bit 12: ITSAB tracklet mismatch. Bit 13: ITS-TPC mismatch. Bit 14: isNoise == True (global track), Bit 15: isFake == True (global track)
 } // namespace otfmctracklable
 
-DECLARE_SOA_TABLE(McTrackWithDauLabels, "AOD", "MCTRACKWithDAULABEL", //! Table joined to the track table containing the MC index
+DECLARE_SOA_TABLE(McTrackWithDauLabels, "AOD", "MCTRACKWITHDAULABEL", //! Table joined to the track table containing the MC index
                   otfmctracklable::McPartWithDauId, otfmctracklable::McMask);
 
 using McTrackWithDauLabel = McTrackWithDauLabels::iterator;
+
+DECLARE_SOA_TABLE(McCascWithDauLabels, "AOD", "MCCASCWITHDAULABEL", //! Table joined to the track table containing the MC index
+                  otfmctracklable::McPartWithDauId);
+
+using McCascWithDauLabel = McCascWithDauLabels::iterator;
 
 } // namespace o2::aod
 

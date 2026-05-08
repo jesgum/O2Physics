@@ -61,8 +61,8 @@ class Decayer
     const double ctau = o2::constants::physics::LightSpeedCm2S * particleInfo->Lifetime(); // cm
     const double betaGamma = particle.p() / mass;
     const double rxyz = -betaGamma * ctau * std::log(1 - u);
-    double vx, vy, vz;
-    double px, py, e;
+    double vx{}, vy{}, vz{};
+    double px{}, py{}, e{};
 
     if (!charge) {
       vx = particle.vx() + rxyz * (particle.px() / particle.p());
