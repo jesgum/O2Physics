@@ -717,12 +717,13 @@ class MultModule
     if (collision.has_foundFT0()) {
       const auto& ft0 = collision.foundFT0();
       mults.fitTriggerMask = ft0.triggerMask();
-      for (size_t ii = 0; ii < ft0.amplitudeA().size(); ii++)
+      for (size_t ii = 0; ii < ft0.amplitudeA().size(); ii++) {
         auto amplitude = ft0.amplitudeA()[ii];
-      auto channel = ft0.channelA()[ii];
-      mults.multFT0A += amplitude;
-      if (channel > 31) { // Inner ring: 0-31
-        mults.multFT0AOuter += amplitude;
+        auto channel = ft0.channelA()[ii];
+        mults.multFT0A += amplitude;
+        if (channel > 31) { // Inner ring: 0-31
+          mults.multFT0AOuter += amplitude;
+        }
       }
     }
     for (const auto& amplitude : ft0.amplitudeC()) {
