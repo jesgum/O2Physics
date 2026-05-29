@@ -101,6 +101,7 @@ DECLARE_SOA_COLUMN(TimeToNeNext, timeToNeNext, float);           //!
 
 // Extra information from FIT detectors
 DECLARE_SOA_COLUMN(MultFV0AOuter, multFV0AOuter, float);     //! FV0 without innermost ring
+DECLARE_SOA_COLUMN(MultFT0AOuter, multFT0AOuter, float);     //! FT0A without innermost ring
 DECLARE_SOA_COLUMN(FT0TriggerMask, ft0TriggerMask, uint8_t); //!
 
 } // namespace mult
@@ -132,7 +133,8 @@ DECLARE_SOA_TABLE(MFTMults, "AOD", "MFTMULT", //! Multiplicity with MFT
 
 DECLARE_SOA_TABLE(FITExtraMults, "AOD", "FITEXTRAMULT", //! Extra information from FIT detectors
                   mult::MultFV0AOuter,
-                  mult::FT0TriggerMask);
+                  mult::FT0TriggerMask,
+                  mult::MultFT0AOuter);
 
 using BarrelMults = soa::Join<TrackletMults, TPCMults, PVMults>;
 using Mults = soa::Join<BarrelMults, FV0Mults, FT0Mults, FDDMults, ZDCMults>;
