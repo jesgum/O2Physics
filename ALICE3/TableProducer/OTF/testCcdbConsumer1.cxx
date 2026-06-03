@@ -58,54 +58,52 @@ struct TestCcdbConsumer1 {
     LOG(info) << "Initialization completed";
   }
 
-  void process(o2::aod::McCollisions const& mcCollisions, o2::aod::McParticles const& mcParticles, o2::aod::A3LookUpTables const& luts)
+  void process(o2::aod::McCollisions::iterator const&, o2::aod::McParticles const& mcParticles, o2::aod::A3LookUpTables const& luts)
   {
-    for (const auto& _ : mcCollisions) {
-      const auto thisTable = luts.begin();
-      smearer.viewTable(PDG_t::kElectron, thisTable.lutEl());
-      smearer.viewTable(PDG_t::kMuonMinus, thisTable.lutMu());
-      smearer.viewTable(PDG_t::kPiPlus, thisTable.lutPi());
-      smearer.viewTable(PDG_t::kKPlus, thisTable.lutKa());
-      smearer.viewTable(PDG_t::kProton, thisTable.lutPr());
-      for (const auto& mcParticle : mcParticles) {
-        if (!pdgsToBeHandled.count(std::abs(mcParticle.pdgCode()))) {
-          continue;
-        }
+    const auto thisTable = luts.begin();
+    smearer.viewTable(PDG_t::kElectron, thisTable.lutEl());
+    smearer.viewTable(PDG_t::kMuonMinus, thisTable.lutMu());
+    smearer.viewTable(PDG_t::kPiPlus, thisTable.lutPi());
+    smearer.viewTable(PDG_t::kKPlus, thisTable.lutKa());
+    smearer.viewTable(PDG_t::kProton, thisTable.lutPr());
+    for (const auto& mcParticle : mcParticles) {
+      if (!pdgsToBeHandled.count(std::abs(mcParticle.pdgCode()))) {
+        continue;
+      }
 
-        o2::track::TrackParCov trackParCov = o2::upgrade::convertMCParticleToO2Track(mcParticle, pdgDB);
-        bool success = smearer.smearTrack(trackParCov, std::abs(mcParticle.pdgCode()), mcParticles.size());
-        if (!success) {
-          histos.fill(HIST("hBookkeeping"), 1.0f);
-          continue;
-        }
-        histos.fill(HIST("hBookkeeping"), 2.0f);
+      o2::track::TrackParCov trackParCov = o2::upgrade::convertMCParticleToO2Track(mcParticle, pdgDB);
+      bool success = smearer.smearTrack(trackParCov, std::abs(mcParticle.pdgCode()), mcParticles.size());
+      if (!success) {
+        histos.fill(HIST("hBookkeeping"), 1.0f);
+        continue;
+      }
+      histos.fill(HIST("hBookkeeping"), 2.0f);
 
 
-        switch (std::abs(mcParticle.pdgCode())) {
-          case PDG_t::kElectron:
-            histos.fill(HIST("hDeltaPtEl"), (trackParCov.getPt() - mcParticle.pt()) / trackParCov.getPt());
-            histos.fill(HIST("h2dDeltaPtEl"), trackParCov.getPt(), (trackParCov.getPt() - mcParticle.pt()) / trackParCov.getPt());
-            break;
-          case PDG_t::kMuonMinus:
-            histos.fill(HIST("hDeltaPtMu"), (trackParCov.getPt() - mcParticle.pt()) / trackParCov.getPt());
-            histos.fill(HIST("h2dDeltaPtMu"), trackParCov.getPt(), (trackParCov.getPt() - mcParticle.pt()) / trackParCov.getPt());
-            break;
-          case PDG_t::kPiPlus:
-            histos.fill(HIST("hDeltaPtPi"), (trackParCov.getPt() - mcParticle.pt()) / trackParCov.getPt());
-            histos.fill(HIST("h2dDeltaPtPi"), trackParCov.getPt(), (trackParCov.getPt() - mcParticle.pt()) / trackParCov.getPt());
-            break;
-          case PDG_t::kKPlus:
-            histos.fill(HIST("hDeltaPtKa"), (trackParCov.getPt() - mcParticle.pt()) / trackParCov.getPt());
-            histos.fill(HIST("h2dDeltaPtKa"), trackParCov.getPt(), (trackParCov.getPt() - mcParticle.pt()) / trackParCov.getPt());
-            break;
-          case PDG_t::kProton:
-            histos.fill(HIST("hDeltaPtPr"), (trackParCov.getPt() - mcParticle.pt()) / trackParCov.getPt());
-            histos.fill(HIST("h2dDeltaPtPr"), trackParCov.getPt(), (trackParCov.getPt() - mcParticle.pt()) / trackParCov.getPt());
-            break;
+      switch (std::abs(mcParticle.pdgCode())) {
+        case PDG_t::kElectron:
+          histos.fill(HIST("hDeltaPtEl"), (trackParCov.getPt() - mcParticle.pt()) / trackParCov.getPt());
+          histos.fill(HIST("h2dDeltaPtEl"), trackParCov.getPt(), (trackParCov.getPt() - mcParticle.pt()) / trackParCov.getPt());
+          break;
+        case PDG_t::kMuonMinus:
+          histos.fill(HIST("hDeltaPtMu"), (trackParCov.getPt() - mcParticle.pt()) / trackParCov.getPt());
+          histos.fill(HIST("h2dDeltaPtMu"), trackParCov.getPt(), (trackParCov.getPt() - mcParticle.pt()) / trackParCov.getPt());
+          break;
+        case PDG_t::kPiPlus:
+          histos.fill(HIST("hDeltaPtPi"), (trackParCov.getPt() - mcParticle.pt()) / trackParCov.getPt());
+          histos.fill(HIST("h2dDeltaPtPi"), trackParCov.getPt(), (trackParCov.getPt() - mcParticle.pt()) / trackParCov.getPt());
+          break;
+        case PDG_t::kKPlus:
+          histos.fill(HIST("hDeltaPtKa"), (trackParCov.getPt() - mcParticle.pt()) / trackParCov.getPt());
+          histos.fill(HIST("h2dDeltaPtKa"), trackParCov.getPt(), (trackParCov.getPt() - mcParticle.pt()) / trackParCov.getPt());
+          break;
+        case PDG_t::kProton:
+          histos.fill(HIST("hDeltaPtPr"), (trackParCov.getPt() - mcParticle.pt()) / trackParCov.getPt());
+          histos.fill(HIST("h2dDeltaPtPr"), trackParCov.getPt(), (trackParCov.getPt() - mcParticle.pt()) / trackParCov.getPt());
+          break;
 
-          default:
-            break;
-        }
+        default:
+          break;
       }
     }
   }
