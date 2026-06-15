@@ -158,7 +158,7 @@ bool TrackSmearer::viewTable(int pdg, const uint8_t* buffer, size_t size, bool f
 {
   const auto ipdg = getIndexPDG(pdg);
   if (mLUTData[ipdg].isLoaded() && !forceReload) {
-    LOGF(info, "LUT table for PDG %d already loaded (index %d)", pdg, ipdg);
+    LOGF(debug, "LUT table for PDG %d already loaded (index %d)", pdg, ipdg);
     return false;
   }
   try {
