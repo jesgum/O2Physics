@@ -58,7 +58,7 @@ static constexpr int nParameters = 1;
 static const std::vector<std::string> tableNames{
   // multiplicity subcomponent
   "FV0Mults",
-  "FV0AOuterMults",
+  "FITExtraMults",
   "FT0Mults",
   "FDDMults",
   "ZDCMults",
@@ -97,12 +97,13 @@ static const std::vector<std::string> tableNames{
   "CentMFTs",
   "BCCentFT0Ms",
   "BCCentFT0As",
-  "BCCentFT0Cs"};
+  "BCCentFT0Cs",
+  "CentFT0MVariant3s"};
 
-static constexpr int nTablesConst = 39;
-
+static constexpr int nTablesConst = 40;
 static const std::vector<std::string> parameterNames{"enable"};
 static const int defaultParameters[nTablesConst][nParameters]{
+  {-1},
   {-1},
   {-1},
   {-1},
@@ -185,6 +186,7 @@ enum tableIndex { kFV0Mults,       // standard
                   kBCCentFT0Ms,       // bc centrality
                   kBCCentFT0As,       // bc centrality
                   kBCCentFT0Cs,       // bc centrality
+                  kCentFT0MVariant3s, // standard Run 3
                   kNTables };
 
 struct products : o2::framework::ProducesGroup {
@@ -222,6 +224,7 @@ struct products : o2::framework::ProducesGroup {
   o2::framework::Produces<aod::CentRun2CL1s> centRun2CL1;
   o2::framework::Produces<aod::CentFV0As> centFV0A;
   o2::framework::Produces<aod::CentFT0Ms> centFT0M;
+  o2::framework::Produces<aod::CentFT0MVariant3s> centFT0MVariant3;
   o2::framework::Produces<aod::CentFT0As> centFT0A;
   o2::framework::Produces<aod::CentFT0Cs> centFT0C;
   o2::framework::Produces<aod::CentFT0CVariant1s> centFT0CVariant1;
@@ -247,6 +250,7 @@ struct multEntry {
   float multFV0C = 0.0f;
   float multFV0AOuter = 0.0f;
   float multFT0A = 0.0f;
+  float multFT0AOuter = 0.0f;
   float multFT0C = 0.0f;
   float multFDDA = 0.0f;
   float multFDDC = 0.0f;
@@ -276,6 +280,7 @@ struct multEntry {
   float multFV0AZeq = -999.0f;
   float multFV0CZeq = -999.0f;
   float multFT0AZeq = -999.0f;
+  float multFT0AOuterZeq = -999.0f;
   float multFT0CZeq = -999.0f;
   float multFDDAZeq = -999.0f;
   float multFDDCZeq = -999.0f;
@@ -443,6 +448,7 @@ class MultModule
 
   CalibrationInfo fv0aInfo = CalibrationInfo("FV0");
   CalibrationInfo ft0mInfo = CalibrationInfo("FT0");
+  CalibrationInfo ft0mVariant3Info = CalibrationInfo("FT0Mvar3");
   CalibrationInfo ft0aInfo = CalibrationInfo("FT0A");
   CalibrationInfo ft0cInfo = CalibrationInfo("FT0C");
   CalibrationInfo ft0cVariant1Info = CalibrationInfo("FT0Cvar1");
@@ -705,7 +711,7 @@ class MultModule
         auto amplitude = fv0.amplitude()[ii];
         auto channel = fv0.channel()[ii];
         mults.multFV0A += amplitude;
-        if (channel > 7) {
+        if (channel > 7) { // Outer ring only
           mults.multFV0AOuter += amplitude;
         }
       }
@@ -716,8 +722,11 @@ class MultModule
     if (collision.has_foundFT0()) {
       const auto& ft0 = collision.foundFT0();
       mults.fitTriggerMask = ft0.triggerMask();
-      for (const auto& amplitude : ft0.amplitudeA()) {
-        mults.multFT0A += amplitude;
+      for (size_t ii = 0; ii < ft0.amplitudeA().size(); ii++) {
+        mults.multFT0A += ft0.amplitudeA()[ii];
+        if (ft0.channelA()[ii] > 31) { // Outer ring only
+          mults.multFT0AOuter += ft0.amplitudeA()[ii];
+        }
       }
       for (const auto& amplitude : ft0.amplitudeC()) {
         mults.multFT0C += amplitude;
@@ -796,6 +805,11 @@ class MultModule
         mults.multFT0AZeq = hVtxZFT0A->Interpolate(0.0) * mults.multFT0A / hVtxZFT0A->Interpolate(collision.posZ());
       } else {
         mults.multFT0AZeq = 0.0f;
+      }
+      if (mults.multFT0AOuter > -1.0f && std::fabs(collision.posZ()) < 15.0f && lCalibLoaded) {
+        mults.multFT0AOuter = hVtxZFT0A->Interpolate(0.0) * mults.multFT0AOuter / hVtxZFT0A->Interpolate(collision.posZ());
+      } else {
+        mults.multFT0AOuter = 0.0f;
       }
       if (mults.multFT0C > -1.0f && std::fabs(collision.posZ()) < 15.0f && lCalibLoaded) {
         mults.multFT0CZeq = hVtxZFT0C->Interpolate(0.0) * mults.multFT0C / hVtxZFT0C->Interpolate(collision.posZ());
@@ -1212,6 +1226,7 @@ class MultModule
 
       fv0aInfo.mCalibrationStored = false;
       ft0mInfo.mCalibrationStored = false;
+      ft0mVariant3Info.mCalibrationStored = false;
       ft0aInfo.mCalibrationStored = false;
       ft0cInfo.mCalibrationStored = false;
       ft0cVariant1Info.mCalibrationStored = false;
@@ -1249,6 +1264,8 @@ class MultModule
           getccdb(fv0aInfo, internalOpts.generatorName);
         if (internalOpts.mEnabledTables[kCentFT0Ms] || internalOpts.mEnabledTables[kBCCentFT0Ms])
           getccdb(ft0mInfo, internalOpts.generatorName);
+        if (internalOpts.mEnabledTables[kCentFT0MVariant3s])
+          getccdb(ft0mVariant3Info, internalOpts.generatorName);
         if (internalOpts.mEnabledTables[kCentFT0As] || internalOpts.mEnabledTables[kBCCentFT0As])
           getccdb(ft0aInfo, internalOpts.generatorName);
         if (internalOpts.mEnabledTables[kCentFT0Cs] || internalOpts.mEnabledTables[kBCCentFT0Cs])
@@ -1332,6 +1349,8 @@ class MultModule
           populateTable(cursors.centFV0A, fv0aInfo, mults[iEv].multFV0AZeq, isInelGt0);
         if (internalOpts.mEnabledTables[kCentFT0Ms])
           populateTable(cursors.centFT0M, ft0mInfo, mults[iEv].multFT0AZeq + mults[iEv].multFT0CZeq, isInelGt0);
+        if (internalOpts.mEnabledTables[kCentFT0MVariant3s])
+          populateTable(cursors.centFT0MVariant3, ft0mVariant3Info, mults[iEv].multFT0AOuterZeq + mults[iEv].multFT0CZeq, isInelGt0);
         if (internalOpts.mEnabledTables[kCentFT0As])
           populateTable(cursors.centFT0A, ft0aInfo, mults[iEv].multFT0AZeq, isInelGt0);
         if (internalOpts.mEnabledTables[kCentFT0Cs])

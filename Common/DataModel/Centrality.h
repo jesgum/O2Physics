@@ -28,9 +28,10 @@ DECLARE_SOA_COLUMN(CentRun2RefMult8, centRun2RefMult8, float);         //! Run 2
 
 DECLARE_SOA_COLUMN(CentFV0A, centFV0A, float);                 //! Run 3 cent. from FV0A multiplicities
 DECLARE_SOA_COLUMN(CentFT0M, centFT0M, float);                 //! Run 3 cent. from FT0A+FT0C multiplicities
+DECLARE_SOA_COLUMN(CentFT0MVariant3, centFT0MVariant3, float); //! Run 3 cent. from FT0AOuter+FT0C multiplicity
 DECLARE_SOA_COLUMN(CentFT0A, centFT0A, float);                 //! Run 3 cent. from FT0A multiplicity
 DECLARE_SOA_COLUMN(CentFT0C, centFT0C, float);                 //! Run 3 cent. from FT0C multiplicity
-DECLARE_SOA_COLUMN(CentFT0CVariant1, centFT0CVariant1, float); //! Run 3 cent. from FT0C multiplicity
+DECLARE_SOA_COLUMN(CentFT0CVariant1, centFT0CVariant1, float); //! Run 3 cent. from FT0C multiplicity, global normalization of glauber fit
 DECLARE_SOA_COLUMN(CentFT0CVariant2, centFT0CVariant2, float); //! Run 3 cent. from FT0C multiplicity, uses classical truncated Nancestors (NOT recommended, cross-check only!)
 DECLARE_SOA_COLUMN(CentFDDM, centFDDM, float);                 //! Run 3 cent. from FDDA+FDDC multiplicity
 DECLARE_SOA_COLUMN(CentNTPV, centNTPV, float);                 //! Run 3 cent. from the number of tracks contributing to the PV
@@ -59,8 +60,9 @@ DECLARE_SOA_TABLE(CentNGlobals, "AOD", "CENTNGLOBAL", cent::CentNGlobal); //! Ru
 DECLARE_SOA_TABLE(CentMFTs, "AOD", "CENTMFT", cent::CentMFT);             //! Run 3 MFT tracks centrality table
 
 // Run 3 variant tables
-DECLARE_SOA_TABLE(CentFT0CVariant1s, "AOD", "CENTFT0Cvar1", cent::CentFT0CVariant1); //! Run 3 FT0C variant 1
-DECLARE_SOA_TABLE(CentFT0CVariant2s, "AOD", "CENTFT0Cvar2", cent::CentFT0CVariant2); //! Run 3 FT0C variant 1 - uses truncated Nancestors in glauber fit. Not recommended! for cross-checks only
+DECLARE_SOA_TABLE(CentFT0CVariant1s, "AOD", "CENTFT0Cvar1", cent::CentFT0CVariant1); //! Run 3 FT0C variant 1 - global normalization
+DECLARE_SOA_TABLE(CentFT0CVariant2s, "AOD", "CENTFT0Cvar2", cent::CentFT0CVariant2); //! Run 3 FT0C variant 2 - uses truncated Nancestors in glauber fit. Not recommended! for cross-checks only
+DECLARE_SOA_TABLE(CentFT0MVariant3s, "AOD", "CENTFT0Mvar3", cent::CentFT0MVariant3); //! Run 3 FT0M variant 3 - excludes FT0A channels that saturates in PbPb (channel id < 31)
 
 // Run 3 centrality per BC (joinable with BC)
 DECLARE_SOA_TABLE(BCCentFT0Ms, "AOD", "BCCENTFT0M", cent::CentFT0M, o2::soa::Marker<1>); //! Run 3 FT0M BC centrality table
@@ -83,6 +85,10 @@ using CentFDDM = CentFDDMs::iterator;
 using CentNTPV = CentNTPVs::iterator;
 using CentNGlobal = CentNGlobals::iterator;
 using CentMFT = CentMFTs::iterator;
+
+using CentFT0CVariant1 = CentFT0CVariant1s::iterator;
+using CentFT0CVariant2 = CentFT0CVariant2s::iterator;
+using CentFT0MVariant3 = CentFT0MVariant3s::iterator;
 
 using BCCentFT0M = BCCentFT0Ms::iterator;
 using BCCentFT0A = BCCentFT0As::iterator;
