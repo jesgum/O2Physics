@@ -30,6 +30,7 @@
 #include "ALICE3/Core/OTFParticle.h"
 #include "ALICE3/Core/TrackUtilities.h"
 #include "ALICE3/DataModel/OTFCollision.h"
+#include "ALICE3/DataModel/OTFLUT.h"
 #include "ALICE3/DataModel/OTFStrangeness.h"
 #include "ALICE3/DataModel/collisionAlice3.h"
 #include "ALICE3/DataModel/tracksAlice3.h"
@@ -161,6 +162,7 @@ struct OnTheFlyTracker {
   Configurable<bool> enablePrimaryVertexing{"enablePrimaryVertexing", true, "Enable primary vertexing"};
   Configurable<std::string> primaryVertexOption{"primaryVertexOption", "pvertexer.maxChi2TZDebris=10;pvertexer.acceptableScale2=9;pvertexer.minScale2=2;pvertexer.timeMarginVertexTime=1.3;;pvertexer.maxChi2TZDebris=40;pvertexer.maxChi2Mean=12;pvertexer.maxMultRatDebris=1.;pvertexer.addTimeSigma2Debris=1e-2;pvertexer.meanVertexExtraErrSelection=0.03;", "Option for the primary vertexer"};
   Configurable<bool> interpolateLutEfficiencyVsNch{"interpolateLutEfficiencyVsNch", true, "interpolate LUT efficiency as f(Nch)"};
+  Configurable<bool> enableLutsFromCcdbTables{"enableLutsFromCcdbTables", false, "Get LUTs from ccdb tables instead of geo manager"};
 
   Configurable<bool> populateTracksDCA{"populateTracksDCA", true, "populate TracksDCA table"};
   Configurable<bool> populateTracksDCACov{"populateTracksDCACov", false, "populate TracksDCACov table"};
@@ -377,6 +379,7 @@ struct OnTheFlyTracker {
 
   // Track smearer array, one per geometry
   std::vector<std::unique_ptr<o2::delphes::TrackSmearer>> mSmearer;
+  int nGeometries = 0;
 
   // For processing and vertexing
   std::vector<TrackAlice3> recoPrimaries;
@@ -414,58 +417,66 @@ struct OnTheFlyTracker {
     mGeoContainer.setCcdbManager(ccdb.operator->());
     mGeoContainer.init(initContext);
 
-    const int nGeometries = mGeoContainer.getNumberOfConfigurations();
+    nGeometries = mGeoContainer.getNumberOfConfigurations();
     mMagneticField = mGeoContainer.getFloatValue(0, "global", "magneticfield");
-    for (int icfg = 0; icfg < nGeometries; ++icfg) {
-      const std::string histPath = "Configuration_" + std::to_string(icfg) + "/";
-      mSmearer.emplace_back(std::make_unique<o2::delphes::TrackSmearer>());
-      mSmearer[icfg]->setCcdbManager(ccdb.operator->());
-      std::map<std::string, std::string> globalConfiguration = mGeoContainer.getConfiguration(icfg, "global");
-      if (enablePrimarySmearing) {
-        // load LUTs for primaries
-        for (const auto& entry : globalConfiguration) {
-          int pdg = 0;
-          if (entry.first.find("lut") != 0) {
-            continue;
-          }
-          if (entry.first.find("lutEl") != std::string::npos) {
-            pdg = kElectron;
-          } else if (entry.first.find("lutMu") != std::string::npos) {
-            pdg = kMuonMinus;
-          } else if (entry.first.find("lutPi") != std::string::npos) {
-            pdg = kPiPlus;
-          } else if (entry.first.find("lutKa") != std::string::npos) {
-            pdg = kKPlus;
-          } else if (entry.first.find("lutPr") != std::string::npos) {
-            pdg = kProton;
-          } else if (entry.first.find("lutDe") != std::string::npos) {
-            pdg = o2::constants::physics::kDeuteron;
-          } else if (entry.first.find("lutTr") != std::string::npos) {
-            pdg = o2::constants::physics::kTriton;
-          } else if (entry.first.find("lutHe3") != std::string::npos) {
-            pdg = o2::constants::physics::kHelium3;
-          } else if (entry.first.find("lutAl") != std::string::npos) {
-            pdg = o2::constants::physics::kAlpha;
-          }
 
-          std::string filename = entry.second;
-          if (pdg == 0) {
-            LOG(fatal) << "Unknown LUT entry " << entry.first << " for global configuration";
+    int nConfigs = std::max(1, nGeometries);
+    for (int icfg = 0; icfg < nConfigs; ++icfg) {
+      const std::string histPath = "Configuration_" + std::to_string(icfg) + "/";
+      if (!enableLutsFromCcdbTables) {
+        mSmearer.emplace_back(std::make_unique<o2::delphes::TrackSmearer>());
+        mSmearer[icfg]->setCcdbManager(ccdb.operator->());
+        std::map<std::string, std::string> globalConfiguration = mGeoContainer.getConfiguration(icfg, "global");
+        if (enablePrimarySmearing) {
+          // load LUTs for primaries
+          for (const auto& entry : globalConfiguration) {
+            int pdg = 0;
+            if (entry.first.find("lut") != 0) {
+              continue;
+            }
+            if (entry.first.find("lutEl") != std::string::npos) {
+              pdg = kElectron;
+            } else if (entry.first.find("lutMu") != std::string::npos) {
+              pdg = kMuonMinus;
+            } else if (entry.first.find("lutPi") != std::string::npos) {
+              pdg = kPiPlus;
+            } else if (entry.first.find("lutKa") != std::string::npos) {
+              pdg = kKPlus;
+            } else if (entry.first.find("lutPr") != std::string::npos) {
+              pdg = kProton;
+            } else if (entry.first.find("lutDe") != std::string::npos) {
+              pdg = o2::constants::physics::kDeuteron;
+            } else if (entry.first.find("lutTr") != std::string::npos) {
+              pdg = o2::constants::physics::kTriton;
+            } else if (entry.first.find("lutHe3") != std::string::npos) {
+              pdg = o2::constants::physics::kHelium3;
+            } else if (entry.first.find("lutAl") != std::string::npos) {
+              pdg = o2::constants::physics::kAlpha;
+            }
+
+            std::string filename = entry.second;
+            if (pdg == 0) {
+              LOG(fatal) << "Unknown LUT entry " << entry.first << " for global configuration";
+            }
+            LOG(info) << "Loading LUT for pdg " << pdg << " for config " << icfg << " from provided file '" << filename << "'";
+            if (filename.empty()) {
+              LOG(warning) << "No LUT file passed for pdg " << pdg << ", skipping.";
+            }
+            // strip from leading/trailing spaces
+            filename.erase(0, filename.find_first_not_of(" "));
+            filename.erase(filename.find_last_not_of(" ") + 1);
+            if (filename.empty()) {
+              LOG(warning) << "No LUT file passed for pdg " << pdg << ", skipping.";
+            }
+            bool success = mSmearer[icfg]->loadTable(pdg, filename.c_str());
+            if (!success) {
+              LOG(fatal) << "Having issue with loading the LUT " << pdg << " " << filename;
+            }
           }
-          LOG(info) << "Loading LUT for pdg " << pdg << " for config " << icfg << " from provided file '" << filename << "'";
-          if (filename.empty()) {
-            LOG(warning) << "No LUT file passed for pdg " << pdg << ", skipping.";
-          }
-          // strip from leading/trailing spaces
-          filename.erase(0, filename.find_first_not_of(" "));
-          filename.erase(filename.find_last_not_of(" ") + 1);
-          if (filename.empty()) {
-            LOG(warning) << "No LUT file passed for pdg " << pdg << ", skipping.";
-          }
-          bool success = mSmearer[icfg]->loadTable(pdg, filename.c_str());
-          if (!success) {
-            LOG(fatal) << "Having issue with loading the LUT " << pdg << " " << filename;
-          }
+        }
+
+        if (nGeometries == 0 && enableLutsFromCcdbTables) {
+          mSmearer.emplace_back(std::make_unique<o2::delphes::TrackSmearer>());
         }
 
         // interpolate efficiencies if requested to do so
@@ -1844,9 +1855,17 @@ struct OnTheFlyTracker {
     }
   }
 
-  void processWithLUTs(aod::McCollision const& mcCollision, aod::McParticles const& mcParticles, const int icfg)
+  void processWithLUTs(aod::McCollision const& mcCollision, aod::McParticles const& mcParticles, aod::A3LookUpTables const& luts, const int icfg)
   {
     const std::string histPath = "Configuration_" + std::to_string(icfg) + "/";
+    if (enableLutsFromCcdbTables && nGeometries == 0) {
+      const auto thisTable = luts.begin();
+      mSmearer[icfg]->viewTable(PDG_t::kElectron, thisTable.lutEl());
+      mSmearer[icfg]->viewTable(PDG_t::kMuonMinus, thisTable.lutMu());
+      mSmearer[icfg]->viewTable(PDG_t::kPiPlus, thisTable.lutPi());
+      mSmearer[icfg]->viewTable(PDG_t::kKPlus, thisTable.lutKa());
+      mSmearer[icfg]->viewTable(PDG_t::kProton, thisTable.lutPr());
+    }
 
     std::vector<int> genCascades;
     std::vector<int> genV0s;
@@ -2022,11 +2041,11 @@ struct OnTheFlyTracker {
     LOG(debug) << " <- Finished processing OTF tracking with LUT configuration ID " << icfg;
   } // end process
 
-  void processOnTheFly(aod::McCollision const& mcCollision, aod::McParticles const& mcParticles)
+  void processOnTheFly(aod::McCollision const& mcCollision, aod::McParticles const& mcParticles, aod::A3LookUpTables const& luts)
   {
     for (size_t icfg = 0; icfg < mSmearer.size(); ++icfg) {
       LOG(debug) << "  -> Processing OTF tracking with LUT configuration ID " << icfg;
-      processWithLUTs(mcCollision, mcParticles, static_cast<int>(icfg));
+      processWithLUTs(mcCollision, mcParticles, luts, static_cast<int>(icfg));
     }
   }
 
