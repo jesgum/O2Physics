@@ -158,7 +158,7 @@ bool TrackSmearer::viewTable(int pdg, const uint8_t* buffer, size_t size, bool f
 {
   const auto ipdg = getIndexPDG(pdg);
   if (mLUTData[ipdg].isLoaded() && !forceReload) {
-    LOGF(info, "LUT table for PDG %d already loaded (index %d)", pdg, ipdg);
+    LOGF(debug, "LUT table for PDG %d already loaded (index %d)", pdg, ipdg);
     return false;
   }
   try {
@@ -180,6 +180,11 @@ bool TrackSmearer::viewTable(int pdg, const uint8_t* buffer, size_t size, bool f
 bool TrackSmearer::viewTable(int pdg, std::span<std::byte> const& span, bool forceReload)
 {
   return viewTable(pdg, reinterpret_cast<const uint8_t*>(span.data()), span.size_bytes(), forceReload);
+}
+
+bool TrackSmearer::viewTable(int pdg, std::string_view sv, bool forceReload)
+{
+  return viewTable(pdg, reinterpret_cast<const uint8_t*>(sv.data()), sv.size(), forceReload);
 }
 
 bool TrackSmearer::hasTable(int pdg) const
@@ -223,7 +228,6 @@ const lutEntry_t* TrackSmearer::getLUTEntry(const int pdg, const float nch, cons
   }
 
   const auto& header = mLUTData[ipdg].getHeaderRef();
-
   auto inch = header.nchmap.find(nch);
   auto irad = header.radmap.find(radius);
   auto ieta = header.etamap.find(eta);
@@ -374,7 +378,7 @@ bool TrackSmearer::smearTrack(O2Track& o2track, int pdg, float nch)
   float interpolatedEff = 0.0f;
   const lutEntry_t* lutEntry = getLUTEntry(pdg, nch, 0.f, eta, pt, interpolatedEff);
 
-  if (!lutEntry || !lutEntry->valid) {
+  if (!lutEntry) {
     return false;
   }
 

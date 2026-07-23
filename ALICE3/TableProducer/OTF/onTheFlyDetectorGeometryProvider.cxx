@@ -16,25 +16,19 @@
 /// \author Nicolò Jacazio <nicolo.jacazio@cern.ch>, Universita del Piemonte Orientale (IT)
 ///
 
-#include "GeometryContainer.h"
+#include "ALICE3/Core/FastTracker.h"
+#include "ALICE3/DataModel/OTFLUT.h"
 
 #include <CCDB/BasicCCDBManager.h>
-#include <Framework/AnalysisDataModel.h>
-#include <Framework/AnalysisHelpers.h>
 #include <Framework/AnalysisTask.h>
-#include <Framework/Configurable.h>
 #include <Framework/HistogramRegistry.h>
-#include <Framework/HistogramSpec.h>
-#include <Framework/InitContext.h>
-#include <Framework/OutputObjHeader.h>
 #include <Framework/runDataProcessing.h>
 
-#include <TH1.h>
-#include <TString.h>
-
-#include <cstdlib>
+#include <map>
 #include <string>
 #include <vector>
+
+using namespace o2::framework;
 
 struct OnTheFlyDetectorGeometryProvider {
   o2::framework::HistogramRegistry histos{"Histos", {}, o2::framework::OutputObjHandlingPolicy::AnalysisObject};
@@ -42,6 +36,8 @@ struct OnTheFlyDetectorGeometryProvider {
   o2::framework::Configurable<std::vector<std::string>> detectorConfiguration{"detectorConfiguration",
                                                                               std::vector<std::string>{"$O2PHYSICS_ROOT/share/alice3/a3geometry_v3.ini"},
                                                                               "Paths of the detector geometry configuration files"};
+
+  Produces<o2::aod::Timestamps> tableTimestamps;
   o2::framework::Service<o2::ccdb::BasicCCDBManager> ccdb;
   void init(o2::framework::InitContext&)
   {
@@ -73,10 +69,18 @@ struct OnTheFlyDetectorGeometryProvider {
     LOG(info) << "Initialization completed";
   }
 
-  void process(o2::aod::McCollisions const& mcCollisions, o2::aod::McParticles const& mcParticles)
+  void processBasicCCDBManager(o2::aod::McCollisions const& mcCollisions, o2::aod::McParticles const& mcParticles)
   {
     LOG(debug) << "On-the-fly detector geometry provider processing " << mcCollisions.size() << " collisions and " << mcParticles.size() << " particles.";
   }
+
+  void processCCDBTable(o2::aod::McCollisions const&, o2::aod::McParticles const&)
+  {
+    tableTimestamps(o2::upgrade::TimestampLUT); // needs to be done for each timeframe - no extra fetches will happen!
+  }
+
+  PROCESS_SWITCH(OnTheFlyDetectorGeometryProvider, processBasicCCDBManager, "Download LUTs using the BasicCCDBManager and load them using the GeometryContainer", true);
+  PROCESS_SWITCH(OnTheFlyDetectorGeometryProvider, processCCDBTable, "Load LUTs through CCDB table", false);
 };
 
 // #define VERIFY_ALICE3
