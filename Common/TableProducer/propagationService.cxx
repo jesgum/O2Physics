@@ -27,8 +27,8 @@
 
 #include "Common/DataModel/EventSelection.h"
 #include "Common/DataModel/PIDResponseTPC.h"
+#include "Common/Modules/TrackPropagationModule.h"
 #include "Common/Tools/StandardCCDBLoader.h"
-#include "Common/Tools/TrackPropagationModule.h"
 #include "Common/Tools/TrackTuner.h"
 
 #include <CCDB/BasicCCDBManager.h>

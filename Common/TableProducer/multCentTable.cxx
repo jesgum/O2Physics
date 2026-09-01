@@ -25,7 +25,7 @@
 #include "Common/Core/MetadataHelper.h"
 #include "Common/DataModel/EventSelection.h"
 #include "Common/DataModel/TrackSelectionTables.h"
-#include "Common/Tools/Multiplicity/MultModule.h"
+#include "Common/Modules/MultModule.h"
 
 #include <CCDB/BasicCCDBManager.h>
 #include <Framework/AnalysisDataModel.h>

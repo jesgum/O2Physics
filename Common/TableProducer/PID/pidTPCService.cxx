@@ -21,7 +21,7 @@
 
 #include "Common/Core/MetadataHelper.h"
 #include "Common/DataModel/EventSelection.h"
-#include "Common/Tools/PID/pidTPCModule.h"
+#include "Common/Modules/pidTPCModule.h"
 
 #include <CCDB/BasicCCDBManager.h>
 #include <Framework/AnalysisDataModel.h>

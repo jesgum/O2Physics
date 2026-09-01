@@ -9,11 +9,6 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-add_subdirectory(DataModel)
-add_subdirectory(Core)
-add_subdirectory(CCDB)
-add_subdirectory(Tasks)
-add_subdirectory(TableProducer)
-add_subdirectory(Tools)
-add_subdirectory(LegacyDataQA)
-add_subdirectory(Modules)
+o2physics_add_library(pidTPCModule
+  SOURCES pidTPCModule.cxx
+  PUBLIC_LINK_LIBRARIES O2Physics::MLCore)
