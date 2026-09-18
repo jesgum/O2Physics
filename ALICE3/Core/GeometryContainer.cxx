@@ -127,6 +127,11 @@ std::map<std::string, std::string> GeometryEntry::getConfiguration(const std::st
   }
 }
 
+bool GeometryEntry::hasLayerName(const std::string& layerName) const
+{
+  return std::find(mLayerNames.begin(), mLayerNames.end(), layerName) != mLayerNames.end();
+}
+
 bool GeometryEntry::hasValue(const std::string& layerName, const std::string& key) const
 {
   auto layerIt = mConfigurations.find(layerName);

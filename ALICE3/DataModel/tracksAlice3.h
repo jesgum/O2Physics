@@ -32,9 +32,18 @@ DECLARE_SOA_COLUMN(NTPCHits, nTPCHits, int);                //! number of tpc hi
 DECLARE_SOA_COLUMN(PdgCode, pdgCode, int);                  //! PDG code of the linked truth MC particle
 DECLARE_SOA_COLUMN(TrackType, trackType, int);              //! Type of the track
 DECLARE_SOA_COLUMN(IsPVContributor, isPVContributor, bool); //! Has track contributed to the PV fit?
+DECLARE_SOA_COLUMN(FirstHitLayer, firstHitLayer, float);    //! Radius for decayed particle produced by decayer (-1 if not decayed)
+DECLARE_SOA_COLUMN(LastHitLayer, lastHitLayer, float);      //! Radius for decayed particle produced by decayer (-1 if not decayed)
+DECLARE_SOA_COLUMN(ReachedInnerTof, reachedInnerTof, bool); //! Radius for decayed particle produced by decayer (-1 if not decayed)
+DECLARE_SOA_COLUMN(ReachedOuterTof, reachedOuterTof, bool); //! Radius for decayed particle produced by decayer (-1 if not decayed)
+
 } // namespace track_alice3
 DECLARE_SOA_TABLE(TracksAlice3, "AOD", "TRACKSALICE3",
-                  track_alice3::IsReconstructed);
+                  track_alice3::IsReconstructed,
+                  track_alice3::FirstHitLayer,
+                  track_alice3::LastHitLayer,
+                  track_alice3::ReachedInnerTof,
+                  track_alice3::ReachedOuterTof);
 using TrackAlice3 = TracksAlice3::iterator;
 
 DECLARE_SOA_TABLE(TracksAlice3Pdg, "AOD", "TRACKSALICE3PDG",

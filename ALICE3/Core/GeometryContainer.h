@@ -64,6 +64,7 @@ struct GeometryEntry {
   std::map<std::string, std::map<std::string, std::string>> getConfigurations() const { return mConfigurations; }
   std::map<std::string, std::string> getConfiguration(const std::string& layerName) const;
   std::vector<std::string> getLayerNames() const { return mLayerNames; }
+  bool hasLayerName(const std::string& layerName) const;
   bool hasValue(const std::string& layerName, const std::string& key) const;
   std::string getValue(const std::string& layerName, const std::string& key, bool require = true) const;
   void setValue(const std::string& layerName, const std::string& key, const std::string& value) { mConfigurations[layerName][key] = value; }

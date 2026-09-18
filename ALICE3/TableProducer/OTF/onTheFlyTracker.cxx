@@ -301,6 +301,14 @@ struct OnTheFlyTracker {
     TrackType trackType;
   };
 
+  // Helper struct to pass track reach information
+  struct TrackReach {
+    float firstReachedLayer{};
+    float lastReachedLayer{};
+    bool reachedInnerTof{};
+    bool reachedOuterTof{};
+  };
+
   // Helper struct to pass cascade information
   struct cascadecandidate {
     int cascadeTrackId; // track index in the Tracks table
@@ -1890,6 +1898,62 @@ struct OnTheFlyTracker {
         getHist<TH2>(histPath + "h2dBRPtResAbs")->Fill(trackParCov.getPt(), trackParCov.getPt() - mcParticle.pt());
       }
     }
+  }
+
+  TrackReach checkTrackReach(const int icfg, const float minRadius, const float maxRadius)
+  {
+    std::vector<float> foundLayers, foundTOF, reachedLayers;
+    const o2::fastsim::GeometryEntry& geometry = mGeoContainer.getEntry(icfg);
+    for (auto const& layerName : geometry.getLayerNames()) {
+      // Layers with global tag are skipped
+      if (layerName.find("global") != std::string::npos) {
+        continue;
+      }
+
+      // TOF layers are not counted as "active" layers
+      if (layerName.find("TOF") != std::string::npos) {
+        foundTOF.push_back(geometry.getFloatValue(layerName, "r"));
+        continue;
+      }
+
+      // Check if layer is active
+      if (geometry.getIntValue(outerKey, "type") != 1) {
+        continue;
+      }
+
+      foundLayers.push_back(geometry.getFloatValue(layerName, "r"));
+    }
+
+    static constexpr size_t NExpectedTOFs = 2;
+    static constexpr float RadiusInnerTOF = 21.f; // Fallback (summer 2026)
+    if (!geometry.hasLayerName("iTOF") && foundTOF.size() != NExpectedTOFs) {
+      foundTOF.push_back(RadiusInnerTOF);
+    }
+
+    static constexpr float RadiusOuterTOF = 92.f; // Fallback (summer 2026)
+    if (!geometry.hasLayerName("oTOF") && foundTOF.size() != NExpectedTOFs) {
+      foundTOF.push_back(RadiusOuterTOF);
+    }
+
+    // Just in case
+    std::sort(foundLayers.begin(), foundLayers.end(), [](const float a, const float b) { return a < b; });
+    std::sort(foundTOF.begin(), foundTOF.end(), [](const float a, const float b) { return a < b; });
+
+    for (const auto& layer : foundLayers) {
+      if (layer >= minRadius && layer <= maxRadius) {
+        reachedLayers.push_back(layer);
+      }
+    }
+
+    for (const auto& layer : foundTOF) {
+      if (layer >= minRadius && layer <= maxRadius) {
+        reachedTOF.push_back(layer);
+      }
+    }
+
+    bool reachedInnerTOF = foundTOF.front() >= minRadius && foundTOF.front() <= maxRadius;
+    bool reachedOuterTOF = foundTOF.back() >= minRadius && foundTOF.back() <= maxRadius;
+    return TrackReach(reachedLayers.front(), reachedLayers.back(), reachedInnerTOF, reachedOuterTOF);
   }
 
   void processWithLUTs(aod::McCollision const& mcCollision, aod::McParticles const& mcParticles, const int icfg)
